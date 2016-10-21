@@ -72,12 +72,6 @@ io.on('connection', function(socket){
     }
     roomUsers = room.users()
 
-    if(!roomUsers.find(function(elem, index, array){
-      return elem.id == myUser.id
-    })){
-      room.addUser(myUser)
-    }
-
     for(let i = 0; i < roomUsers.length;i++){
       let curUser = roomUsers[i]
 
@@ -85,6 +79,12 @@ io.on('connection', function(socket){
         message : 'User ' + myUser.id + ' has entered the chat',
         room : msg
       }))
+    }
+
+    if(!roomUsers.find(function(elem, index, array){
+        return elem.id == myUser.id
+      })){
+      room.addUser(myUser)
     }
 
     io.to(myUser.socket.id).emit('chat', JSON.stringify({
