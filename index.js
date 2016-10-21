@@ -4,7 +4,7 @@ let http = require('http').createServer(app)
 let io = require('socket.io')(http)
 let chatRoom = require('./chatRoomFactory.js')
 let path = require('path')
-let rootPath = path.normalize(__dirname + '/../')
+let rootPath = path.normalize(__dirname)
 let totalUserCount = 0
 
 //let users = []
@@ -16,7 +16,7 @@ function getChatRoom(name){
   })
 }
 
-app.use(express.static(rootPath + '/Test SPA'))
+app.use(express.static(rootPath))
 
 app.get('/*', function(req, res){
 
@@ -25,7 +25,7 @@ app.get('/*', function(req, res){
     chatRooms.push(new chatRoom(req.originalUrl))
   }
 
-  res.sendFile(rootPath + '/Test SPA/pageWrapper.html')
+  res.sendFile(rootPath + '/pageWrapper.html')
 })
 
 io.on('connection', function(socket){
