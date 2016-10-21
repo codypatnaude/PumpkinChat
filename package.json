@@ -1,0 +1,16 @@
+{
+  "name": "pumpkin chat",
+  "version": "1.0.0",
+  "description": "Anonymous chatroom site that's awesome",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "express": "^4.14.0",
+    "socket.io": "^1.5.0"
+  }
+}
