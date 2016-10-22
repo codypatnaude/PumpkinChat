@@ -24,7 +24,8 @@ io.on('connection', function(socket){
 
   let myUser = {
     id: usercount,
-    socket: socket
+    socket: socket,
+    attributes: new Array()
   }
 
   users.push(myUser)
@@ -65,7 +66,7 @@ io.on('connection', function(socket){
 
     roomUsers.forEach(function(elem){
       io.to(elem.socket.id).emit('chat', JSON.stringify({
-        message : 'User ' + myUser.id + ': ' + message,
+        message : (myUser.name || 'User ' + myUser.id) + ': ' + message,
         room : room
       }))
     })
@@ -94,6 +95,20 @@ io.on('connection', function(socket){
         message : 'User ' + myUser.id + ': has left the chat',
         room : room
       }))
+    })
+  })
+
+  socket.on('settings', function(settings){
+    console.log('settings for user ' + myUser.id + ' : ' + settings)
+
+    let settingsArray = settings.split(";")
+    settingsArray.forEach(function(elem){
+      let x = elem.split("=")
+      if(x[0] === 'name'){
+        myUser.name = x[1]
+      }else{
+        myUser.attributes.push(elem)
+      }
     })
   })
 })

@@ -67,10 +67,18 @@
     <script>
       var socket = io();
       $('form').submit(function(e){
-        // Prevent form submit from triggering page rerfresh. 
+        // Prevent form submit from triggering page rerfresh.
         e.preventDefault();
         e.stopPropagation();
-        console.log("sending: " + $('#m').val())
+
+        var toSend = $('#m').val()
+
+        if(toSend.substring( 0, 1) == '~'){
+          socket.emit('settings', toSend.substring(1, toSend.length))
+          $('#m').val('')
+          return
+        }
+
         let msg = {
           message : $('#m').val(),
           room : document.location.pathname
