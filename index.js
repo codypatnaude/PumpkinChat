@@ -25,7 +25,8 @@ io.on('connection', function(socket){
   let myUser = {
     id: usercount,
     socket: socket,
-    attributes: new Array()
+    attributes: new Array(),
+    strikes: 0
   }
 
   users.push(myUser)
@@ -59,6 +60,14 @@ io.on('connection', function(socket){
     let msgObj = JSON.parse(msg)
     let message = msgObj.message
     let room = msgObj.room
+
+    if(myUser.strikes >= 3){
+      io.to(myUser.socket.id).emit('chat', JSON.stringify({
+        message : 'The community has respectfully asked that you fuck off',
+        room : room
+      }))
+      return
+    }
 
     let roomUsers = users.filter(function(elem){
       return elem.room == room && elem.id != myUser.id
@@ -106,6 +115,23 @@ io.on('connection', function(socket){
       let x = elem.split("=")
       if(x[0] === 'name'){
         myUser.name = x[1]
+
+      }else if(x[0] == 'kick'){
+        let kickUserIndex = users.findIndex(function(elem, index, array){
+          return (elem.name && elem.name == x[1]) || ('User' + elem.id == x[1])
+        })
+
+        kickUser = users[kickUserIndex]
+        kickUser.strikes++
+
+        if(kickUser.strikes >= 3){
+          io.to(kickUser.socket.id).emit('chat', JSON.stringify(
+            {message:'Apparently you\'re an asshole. You\'ve been kicked from this chat. Fuck off',
+            room:kickUser.room})
+          )
+          users.splice(kickUserIndex, 1)
+        }
+
       }else{
         myUser.attributes.push(elem)
       }
