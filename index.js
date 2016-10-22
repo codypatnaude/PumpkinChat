@@ -77,10 +77,13 @@ io.on('connection', function(socket){
   })
 
   socket.on('disconnect', function(){
-    console.log('user has left')
+    //console.log('user has left')
+    //console.log("USERS:", users.length)
     users = users.filter(function(elem){
-      elem.id != myUser.id
+      return elem.id != myUser.id
     })
+    //console.log("USERS:", users.length)
+    room = myUser.room
 
     let roomUsers = users.filter(function(elem){
       return elem.room == room && elem.id != myUser.id
