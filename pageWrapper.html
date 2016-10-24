@@ -50,12 +50,39 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/node_modules/socket.io-client/socket.io.js"></script>
     <script>
+    (function() {
+      var storage = {
+        set: function(key, val) {
+          window.localStorage[key] = val;
+        },
+        get: function(key) {
+          return window.localStorage[key]
+        }
+      }
+      if(!window.storage) {
+        window.storage = storage;
+      }
+    }());
+    </script>
+    <script>
 	  $('document').ready(function(){
 		$('#m').focus()
 	  })
+
       var socket = io();
-      $('form').submit(function(){
-        console.log("sending: " + $('#m').val())
+      $('form').submit(function(e){
+        // Prevent form submit from triggering page rerfresh.
+        e.preventDefault();
+        e.stopPropagation();
+
+        var toSend = $('#m').val()
+
+        if(toSend.substring( 0, 1) == '~'){
+          socket.emit('settings', toSend.substring(1, toSend.length))
+          $('#m').val('')
+          return
+        }
+
         let msg = {
           message : $('#m').val(),
           room : document.location.pathname
