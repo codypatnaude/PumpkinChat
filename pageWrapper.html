@@ -50,6 +50,9 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/node_modules/socket.io-client/socket.io.js"></script>
     <script>
+	  $('document').ready(function(){
+		$('#m').focus()
+	  })
       var socket = io();
       $('form').submit(function(){
         console.log("sending: " + $('#m').val())
@@ -66,7 +69,7 @@
         console.log('received msg')
         console.log(msgObj)
         if(msgObj.room == document.location.pathname){
-          $('#messages').append($('<li>').text(msgObj.message))
+          $('#messages').append($('<li>').html(msgObj.message))
           window.scrollTo(0,document.body.scrollHeight)
         }
 

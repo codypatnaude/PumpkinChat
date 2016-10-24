@@ -1,5 +1,6 @@
 let express = require('express')
 let app = express()
+let striptags = require('striptags')
 let http = require('http').createServer(app)
 let io = require('socket.io')(http)
 let chatRoom = require('./chatRoomFactory.js')
@@ -14,6 +15,29 @@ function getChatRoom(name){
   return chatRooms.find(function(elem, index, array){
     return elem.chatRoomName() == name
   })
+}
+
+function processMsg(msg){
+  let message = striptags(msg) // don't inject me bruh
+  let re = /^\/([a-z]+)\s(.*)/g;
+  let match = re.exec(message)
+  let valid=true
+  if (match) {
+    let cmd = match[1], arg = match[2]
+    console.log(cmd); 
+    console.log(arg); 
+
+    //images (and maybe other commands...)
+    switch (cmd) {
+      case 'img':
+       message = '<img src="'+arg+'"/>'
+       break
+      default:
+        message = 'INVALID COMMAND MEATBAG' 
+        valid = false
+    }
+  }
+  return { contents : message, success : valid } 
 }
 
 app.use(express.static(rootPath))
@@ -93,12 +117,10 @@ io.on('connection', function(socket){
     }))
   })
 
-
-
   socket.on('chat', function(msg){
     console.log('message: ' + msg)
     let msgObj = JSON.parse(msg)
-    let message = msgObj.message
+    let message = processMsg(msgObj.message)
     let chatRoomName = msgObj.room
     let room = getChatRoom(chatRoomName)
 
@@ -110,6 +132,7 @@ io.on('connection', function(socket){
       chatRooms.push(room)
       room.addUser(myUser)
     }else{
+
       let roomUsers = room.users()
       //console.log("chat name" + room.chatRoomName())
       //console.log(room)
@@ -120,14 +143,15 @@ io.on('connection', function(socket){
 
         if(curUser.id === myUser.id){
           io.to(curUser.socket.id).emit('chat', JSON.stringify({
-            message : 'You: ' + message,
+            message : 'You: ' + message.contents,
             room : chatRoomName
           }))
         }else{
-          io.to(curUser.socket.id).emit('chat', JSON.stringify({
-            message : 'User ' + myUser.id + ': ' + message,
-            room : chatRoomName
-          }))
+          if (message.success)
+            io.to(curUser.socket.id).emit('chat', JSON.stringify({
+             message : 'User ' + myUser.id + ': ' + message.contents,
+             room : chatRoomName
+            }))
         }
 
       }
